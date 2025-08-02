@@ -327,42 +327,130 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  <CreditCard size={20} className="text-purple-600" />
                   Forma de pagamento *
                 </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
+                <div className="space-y-4">
+                  <label className="group relative flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-green-400 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300 transform hover:scale-[1.02]">
                     <input
                       type="radio"
                       name="payment"
                       value="money"
                       checked={paymentMethod === 'money'}
                       onChange={() => setPaymentMethod('money')}
-                      className="text-purple-600"
+                      className="sr-only"
                     />
-                    <span>Dinheiro</span>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      paymentMethod === 'money' 
+                        ? 'border-green-500 bg-green-500' 
+                        : 'border-gray-300 group-hover:border-green-400'
+                    }`}>
+                      {paymentMethod === 'money' && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className={`p-3 rounded-full transition-all ${
+                        paymentMethod === 'money' 
+                          ? 'bg-green-100 text-green-600' 
+                          : 'bg-gray-100 text-gray-600 group-hover:bg-green-100 group-hover:text-green-600'
+                      }`}>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <span className={`font-semibold text-lg transition-colors ${
+                          paymentMethod === 'money' 
+                            ? 'text-green-700' 
+                            : 'text-gray-700 group-hover:text-green-700'
+                        }`}>
+                          Dinheiro
+                        </span>
+                        <p className="text-sm text-gray-500">Pagamento na entrega</p>
+                      </div>
+                    </div>
                   </label>
-                  <label className="flex items-center gap-2">
+                  
+                  <label className="group relative flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 transform hover:scale-[1.02]">
                     <input
                       type="radio"
                       name="payment"
                       value="pix"
                       checked={paymentMethod === 'pix'}
                       onChange={() => setPaymentMethod('pix')}
-                      className="text-purple-600"
+                      className="sr-only"
                     />
-                    <span>PIX</span>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      paymentMethod === 'pix' 
+                        ? 'border-blue-500 bg-blue-500' 
+                        : 'border-gray-300 group-hover:border-blue-400'
+                    }`}>
+                      {paymentMethod === 'pix' && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className={`p-3 rounded-full transition-all ${
+                        paymentMethod === 'pix' 
+                          ? 'bg-blue-100 text-blue-600' 
+                          : 'bg-gray-100 text-gray-600 group-hover:bg-blue-100 group-hover:text-blue-600'
+                      }`}>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <span className={`font-semibold text-lg transition-colors ${
+                          paymentMethod === 'pix' 
+                            ? 'text-blue-700' 
+                            : 'text-gray-700 group-hover:text-blue-700'
+                        }`}>
+                          PIX
+                        </span>
+                        <p className="text-sm text-gray-500">Pagamento instantâneo</p>
+                      </div>
+                    </div>
                   </label>
-                  <label className="flex items-center gap-2">
+                  
+                  <label className="group relative flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-400 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 transform hover:scale-[1.02]">
                     <input
                       type="radio"
                       name="payment"
                       value="card"
                       checked={paymentMethod === 'card'}
                       onChange={() => setPaymentMethod('card')}
-                      className="text-purple-600"
+                      className="sr-only"
                     />
-                    <span>Cartão</span>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      paymentMethod === 'card' 
+                        ? 'border-purple-500 bg-purple-500' 
+                        : 'border-gray-300 group-hover:border-purple-400'
+                    }`}>
+                      {paymentMethod === 'card' && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className={`p-3 rounded-full transition-all ${
+                        paymentMethod === 'card' 
+                          ? 'bg-purple-100 text-purple-600' 
+                          : 'bg-gray-100 text-gray-600 group-hover:bg-purple-100 group-hover:text-purple-600'
+                      }`}>
+                        <CreditCard size={20} />
+                      </div>
+                      <div>
+                        <span className={`font-semibold text-lg transition-colors ${
+                          paymentMethod === 'card' 
+                            ? 'text-purple-700' 
+                            : 'text-gray-700 group-hover:text-purple-700'
+                        }`}>
+                          Cartão
+                        </span>
+                        <p className="text-sm text-gray-500">Crédito ou débito</p>
+                      </div>
+                    </div>
                   </label>
                 </div>
               </div>
