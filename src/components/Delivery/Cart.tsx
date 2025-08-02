@@ -900,7 +900,6 @@ const Cart: React.FC<CartProps> = ({
                         <CheckCircle size={20} className="text-green-500" />
                       </div>
                     )}
-                    </div>
                   </label>
                   
                   <label className="group relative flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 transform hover:scale-[1.02]">
