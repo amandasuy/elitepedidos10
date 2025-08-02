@@ -30,6 +30,9 @@ const TableSalesPanel: React.FC<TableSalesPanelProps> = ({ storeId, operatorName
   const [paymentMethod, setPaymentMethod] = useState<'dinheiro' | 'pix' | 'cartao_credito' | 'cartao_debito' | 'voucher' | 'misto'>('dinheiro');
   const [changeFor, setChangeFor] = useState<number | undefined>();
   const [notes, setNotes] = useState('');
+  const [availableProducts, setAvailableProducts] = useState<any[]>([]);
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isSavingSale, setIsSavingSale] = useState(false);
   const [isFinalizingSale, setIsFinalizingSale] = useState(false);
   const [availableTableNumbers, setAvailableTableNumbers] = useState<number[]>([]);
@@ -117,6 +120,57 @@ const TableSalesPanel: React.FC<TableSalesPanelProps> = ({ storeId, operatorName
   useEffect(() => {
     setAvailableTableNumbers(getAvailableTableNumbers());
   }, [tables, getAvailableTableNumbers]);
+
+  // Carregar produtos disponíveis
+  const fetchAvailableProducts = async () => {
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+        // Produtos de demonstração
+        const demoProducts = [
+          { id: '1', code: 'ACAI300', name: 'Açaí 300ml', category: 'acai', unit_price: 15.90, is_weighable: false },
+          { id: '2', code: 'ACAI500', name: 'Açaí 500ml', category: 'acai', unit_price: 22.90, is_weighable: false },
+          { id: '3', code: 'MILK400', name: 'Milkshake 400ml', category: 'bebidas', unit_price: 11.99, is_weighable: false },
+          { id: '4', code: 'GRAN001', name: 'Granola', category: 'complementos', unit_price: 3.00, is_weighable: false }
+        ];
+        setAvailableProducts(demoProducts);
+        return;
+      }
+
+      const productTable = storeId === 1 ? 'pdv_products' : 'store2_products';
+      const { data, error } = await supabase
+        .from(productTable)
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      setAvailableProducts(data || []);
+    } catch (err) {
+      console.error('Erro ao carregar produtos:', err);
+      setAvailableProducts([]);
+    }
+  };
+
+  // Filtrar produtos por busca e categoria
+  const filteredAvailableProducts = availableProducts.filter(product => {
+    const matchesSearch = !productSearchTerm || 
+      product.name.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+      product.code.toLowerCase().includes(productSearchTerm.toLowerCase());
+    
+    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = [
+    { id: 'all', label: 'Todas' },
+    { id: 'acai', label: 'Açaí' },
+    { id: 'bebidas', label: 'Bebidas' },
+    { id: 'complementos', label: 'Complementos' },
+    { id: 'sobremesas', label: 'Sobremesas' },
+    { id: 'outros', label: 'Outros' }
+  ];
 
   const fetchTables = async () => {
     try {
@@ -346,6 +400,8 @@ const TableSalesPanel: React.FC<TableSalesPanelProps> = ({ storeId, operatorName
       setCart([]);
     }
     
+    setProductSearchTerm('');
+    setSelectedCategory('all');
     setShowSaleModal(true);
   };
 
@@ -394,6 +450,54 @@ const TableSalesPanel: React.FC<TableSalesPanelProps> = ({ storeId, operatorName
     }
   };
 
+  // Adicionar produto ao carrinho
+  const addProductToCart = (product: any, quantity: number = 1) => {
+    const existingItemIndex = cart.findIndex(item => item.product_code === product.code);
+    
+    if (existingItemIndex >= 0) {
+      // Atualizar quantidade do item existente
+      const updatedItems = [...cart];
+      updatedItems[existingItemIndex].quantity += quantity;
+      updatedItems[existingItemIndex].subtotal = updatedItems[existingItemIndex].quantity * (product.unit_price || 0);
+      setCart(updatedItems);
+    } else {
+      // Adicionar novo item
+      const newItem: TableCartItem = {
+        product_code: product.code,
+        product_name: product.name,
+        quantity,
+        unit_price: product.unit_price,
+        price_per_gram: product.price_per_gram,
+        subtotal: quantity * (product.unit_price || 0)
+      };
+      setCart(prev => [...prev, newItem]);
+    }
+  };
+
+  // Remover produto do carrinho
+  const removeProductFromCart = (productCode: string) => {
+    setCart(prev => prev.filter(item => item.product_code !== productCode));
+  };
+
+  // Atualizar quantidade no carrinho
+  const updateCartItemQuantity = (productCode: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeProductFromCart(productCode);
+      return;
+    }
+
+    setCart(prev => prev.map(item => {
+      if (item.product_code === productCode) {
+        return {
+          ...item,
+          quantity,
+          subtotal: quantity * (item.unit_price || 0)
+        };
+      }
+      return item;
+    }));
+  };
+
   const handleWeightConfirm = (weightInGrams: number) => {
     if (selectedWeighableProduct && weightInGrams > 0) {
       const weightInKg = weightInGrams / 1000;
@@ -417,7 +521,7 @@ const TableSalesPanel: React.FC<TableSalesPanelProps> = ({ storeId, operatorName
     setSelectedWeighableProduct(null);
   };
 
-  const updateCartItemQuantity = (index: number, quantity: number) => {
+  const updateCartItemQuantityByIndex = (index: number, quantity: number) => {
     if (quantity <= 0) {
       setCart(prev => prev.filter((_, i) => i !== index));
       return;
@@ -740,6 +844,7 @@ const TableSalesPanel: React.FC<TableSalesPanelProps> = ({ storeId, operatorName
 
   useEffect(() => {
     fetchTables();
+    fetchAvailableProducts();
   }, [storeId]);
 
   if (loading) {
@@ -1270,14 +1375,14 @@ const TableSalesPanel: React.FC<TableSalesPanelProps> = ({ storeId, operatorName
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3 bg-white rounded-lg p-2 border border-gray-200">
                               <button
-                                onClick={() => updateCartItemQuantity(index, item.quantity - 1)}
+                                onClick={() => updateCartItemQuantityByIndex(index, item.quantity - 1)}
                                 className="bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-1 transition-colors"
                               >
                                 <Minus size={16} />
                               </button>
                               <span className="w-8 text-center font-bold">{item.quantity}</span>
                               <button
-                                onClick={() => updateCartItemQuantity(index, item.quantity + 1)}
+                                onClick={() => updateCartItemQuantityByIndex(index, item.quantity + 1)}
                                 className="bg-green-100 hover:bg-green-200 text-green-600 rounded-full p-1 transition-colors"
                               >
                                 <Plus size={16} />
