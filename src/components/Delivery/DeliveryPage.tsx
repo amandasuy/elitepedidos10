@@ -522,7 +522,7 @@ const DeliveryPage: React.FC = () => {
       </div>
 
       {/* Chatbot */}
-      <AcaiChatbot />
+      {/* <AcaiChatbot /> */}
 
       {/* Modais */}
       {selectedProduct && (
